@@ -1,58 +1,30 @@
-# FROM php:7.4.33-cli-alpine
-# FROM php:8.1.28-cli-alpine
-# FROM php:8.2.18-cli-alpine
-FROM php:8.3.22-cli-alpine
+ARG WEBMAN_DOCKER_VERSION=8.1-cli-alpine
 
-LABEL Maintainer="Max Huang (小熊猫) <lampardhuang@foxmail.com>" \
-    Description="Webman Lightweight container with PHP 8.3.22 based on Alpine Linux."
+# https://github.com/krissss/docker-webman
+FROM krisss/docker-webman:$WEBMAN_DOCKER_VERSION
 
-# Container package  : mirrors.163.com、mirrors.aliyun.com、mirrors.ustc.edu.cn
-RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
-# RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g" /etc/apk/repositories
+# 增加额外的扩展
+#RUN install-php-extensions imagick
 
-RUN cat /etc/issue
+# 设置配置文件
+# 自定义 php 配置文件，如果需要的话
+# 覆盖镜像自带的
+#COPY environments/docker/php.ini "$PHP_INI_DIR/conf.d/app.ini"
+# 扩展额外的
+#COPY environments/docker/my_php.ini "$PHP_INI_DIR/conf.d/my_php.ini"
+# 自定义 supervisor 配置，如果需要的话
+# 覆盖镜像自带的
+#COPY environments/docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# 扩展额外的
+#COPY environments/docker/my_supervisord.conf /etc/supervisor/conf.d/my_supervisord.conf
 
-# [php74] Add basics first
-RUN apk update && apk add bash curl ca-certificates openssl openssh git libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg-turbo-dev libpng-dev freetype-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev libffi-dev libressl-dev libevent-dev zlib-dev libtool automake supervisor
+# 预先加载 Composer 包依赖，优化 Docker 构建镜像的速度
+COPY ./composer.json /app/
+COPY ./composer.lock /app/
+RUN composer install --no-interaction --no-dev --no-autoloader --no-scripts
 
-# [php8] Add basics first
-# RUN apt-get update && apt-get upgrade && apt-get install bash curl ca-certificates openssl openssh git nano libxml2-dev tzdata icu-dev openntpd libedit-dev libzip-dev libjpeg62-turbo-dev libpng12-dev libfreetype6-dev autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c pcre-dev openssl-dev libffi-dev libressl-dev libevent-dev zlib-dev libtool automake supervisor
+# 复制项目代码
+COPY . /app
 
-COPY ./extension /tmp/extension
-WORKDIR /tmp/extension
-RUN chmod +x install.sh \
-    && sh install.sh \
-    && rm -rf /tmp/extension
-
-RUN php -m
-
-# Add Composer
-RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
-
-# Configure PHP
-COPY config/php.ini /usr/local/etc/php/conf.d/zzz_custom.ini
-
-# Configure supervisord
-COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Make sure files/folders needed by the processes are accessable when they run under the nobody user
-RUN chown -R nobody:nobody /run
-
-# Setup document root
-RUN mkdir -p /app
-
-# Make the document root a volume
-VOLUME /app
-
-#echo " > /usr/local/etc/php/conf.d/phalcon.ini
-# Switch to use a non-root user from here on
-USER root
-
-# Add application
-WORKDIR /app
-
-# Expose the port nginx is reachable on
-EXPOSE 8787
-
-# Let supervisord start nginx & php
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# 执行 Composer 自动加载和相关脚本
+RUN composer install --no-interaction --no-dev && composer dump-autoload

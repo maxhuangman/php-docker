@@ -93,8 +93,13 @@ docker-compose up -d webman frankenphp mysql redis dpanel elasticsearch alist
 docker build -t docker-webman:1.0 .
 ```
 #### 使用镜像(在项目根目录下)
+- 1、默认随机容器名称
 ```bash
 docker run --rm -it -p 8787:8787 -v ./:/app docker-webman:1.0
+```
+- 2、指定随机容器名称
+```bash
+docker run --rm -it -p 8787:8787 -v ./:/app --name my-webman-container docker-webman:1.0
 ```
 #### 访问服务
 ```bash
