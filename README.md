@@ -107,7 +107,7 @@ docker-compose logs -f webman
 
 ### 2. FrankenPHP (Web 服务器)
 - **端口**: 80 (HTTP), 443 (HTTPS)
-- **网站根目录**: `./wwwroot`
+- **网站根目录**: `./frankenphp/wwwroot`
 
 #### 站点配置
 - **Caddy 配置文件**: `caddy/Caddyfile`
