@@ -3,8 +3,8 @@
 # FROM php:8.2.18-cli-alpine
 FROM php:8.3.22-cli-alpine
 
-LABEL Maintainer="Max Huang(小熊猫) <lampardhuang@foxmail.com>" \
-    Description="Webman Lightweight container with PHP 8.3.22 based on Alpine Linux."
+LABEL Maintainer="ShaoBo Wan (Tinywan) <756684177@qq.com>" \
+    Description="Webman Lightweight container with PHP 8.2.16 based on Alpine Linux."
 
 # Container package  : mirrors.163.com、mirrors.aliyun.com、mirrors.ustc.edu.cn
 RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
