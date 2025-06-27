@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Data directories
+alist/
+mysql/
+redis/
+mariadb/
+elasticsearch/
+dpanel/
+
+# Laradock (if not needed)
+laradock/
+
+# Node modules (if any)
+node_modules/
+
+# Composer vendor (will be installed in container)
+vendor/
+
+# Cache
+.cache/
+*.cache
+
+# Temporary files
+tmp/
+temp/
+*.tmp 
