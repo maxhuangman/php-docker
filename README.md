@@ -1,8 +1,16 @@
 # Docker FrankenPHP 服务环境
 
-基于 Docker Compose 的多服务开发环境，集成 Web 服务器(FrankenPHP)、数据库(MySQL)、缓存(Redis)、搜索引擎(Elasticsearch)、文件管理服务(Alist)、反向代理(Caddy)、Docker 管理面板(DPanel)等常用服务。
+基于 Docker Compose 的多服务开发环境，集成 Webman开发环境、Web 服务器(FrankenPHP)、数据库(MySQL)、缓存(Redis)、搜索引擎(Elasticsearch)、文件管理服务(Alist)、反向代理(Caddy)、Docker 管理面板(DPanel，MacOS系统最优解)等常用服务。
 
 开箱即用，无需额外配置即可快速启动和运行。
+- Webman 项目直接使用使用自定义镜像（`./webman/Dockerfile`）
+- 支持传统PHP-FPM项目，如Laravel、Thinkphp、WordPress等，使用FrankenPHP服务进行优化，相同配置能提升约3～5倍性能
+- Hyperf (后续计划支持)
+- Mysql
+- Redis
+- Elasticsearch
+- DPanel
+- Alist
 
 ## 🚀 服务概览
 
