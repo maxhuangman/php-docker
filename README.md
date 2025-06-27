@@ -287,5 +287,5 @@ service/
 - 生产环境建议配置 SSL 证书
 - 考虑限制端口访问范围
 
-## 🙏感谢清单
+## 🙏 感谢清单
 - [tinywan/docker-php-webman](https://github.com/Tinywan/docker-php-webman)
