@@ -97,9 +97,9 @@ docker build -t docker-webman:1.0 .
 ```bash
 docker run --rm -it -p 8787:8787 -v ./:/app docker-webman:1.0
 ```
-- 2、指定随机容器名称
+- 2、指定随机容器名称（后台运行 自动重启）
 ```bash
-docker run --rm -it -p 8787:8787 -v ./:/app --name my-webman-container docker-webman:1.0
+docker run -it -d -p 8787:8787 -v ./:/app --name maxadmin-webman --restart=always docker-webman:1.0
 ```
 #### 访问服务
 ```bash

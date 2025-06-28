@@ -185,21 +185,7 @@ fi
 
 if [[ -z "${EXTENSIONS##*,gd,*}" ]]; then
     echo "---------- Install gd ----------"
-
-    apk add --no-cache \
-        freetype \
-        freetype-dev \
-        libpng \
-        libpng-dev \
-        libjpeg-turbo \
-        libjpeg-turbo-dev \
-        libwebp-dev &&
-        docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp --enable-swoole-curl &&
-        docker-php-ext-install gd &&
-        apk del \
-            freetype-dev \
-            libpng-dev \
-            libjpeg-turbo-dev
+    docker-php-ext-install ${MC} gd
 fi
 
 if [[ -z "${EXTENSIONS##*,intl,*}" ]]; then
