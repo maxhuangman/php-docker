@@ -24,6 +24,18 @@ RUN chmod +x install.sh \
     && sh install.sh \
     && rm -rf /tmp/extension
 
+RUN apk add --no-cache \
+    php83-gd \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    # 配置 gd 扩展
+    && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg \
+    # 其他扩展
+    # 安装redis扩展
+    && pecl install redis-6.2.0 \
+    && docker-php-ext-enable redis
+
 RUN php -m
 
 # Add Composer
