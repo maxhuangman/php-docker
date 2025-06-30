@@ -7,6 +7,8 @@ services:
       - "8787:8787"
     volumes:
       - ./webman/www:/app
+    networks:
+      - maxhuang_network
   # FrankenPHP 服务
   frankenphp:
     build: ./frankenphp  # 使用 frankenphp 目录下的 Dockerfile 构建
@@ -32,6 +34,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - maxhuang_network
   # MySQL 数据库服务
   mysql:
     image: mysql:8.4  # 官方镜像（推荐使用固定版本）
@@ -53,6 +57,8 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
+    networks:
+      - maxhuang_network
   # Redis 缓存服务
   redis:
     image: redis:latest
@@ -64,6 +70,8 @@ services:
       - ./redis/data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - ./redis/logs:/logs
+    networks:
+      - maxhuang_network
   # DPanel 服务
   dpanel:
     image: dpanel/dpanel:latest
@@ -77,6 +85,8 @@ services:
       APP_NAME: dpanel # 请保持此名称与 container_name 一致
     volumes:
       - ./dpanel:/dpanel # 将 /home/dpanel 更改为你想要挂载的宿主机目录
+    networks:
+      - maxhuang_network
   # Elasticsearch 服务
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.3
@@ -94,6 +104,8 @@ services:
       xpack.security.http.ssl.enabled: "false"
       xpack.security.transport.ssl.enabled: "false"
       TZ: Asia/Shanghai
+    networks:
+      - maxhuang_network
   # Alist 文件管理服务
   alist:
     image: 'xhofe/alist:beta'
@@ -107,8 +119,11 @@ services:
       - PGID=0
       - UMASK=022
     restart: unless-stopped
+    networks:
+      - maxhuang_network
 
 # 自定义网络配置（容器间可通过服务名通信）
 networks:
-  app_network:
+  maxhuang_network:
+    name: maxhuang_network  # 指定确切的网络名称，避免项目前缀
     driver: bridge  # 桥接网络
