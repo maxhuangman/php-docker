@@ -1,12 +1,13 @@
 # Docker FrankenPHP 服务环境
 
-基于 Docker Compose 的多服务开发环境，集成 Webman开发环境、Web 服务器(FrankenPHP)、数据库(MySQL)、缓存(Redis)、搜索引擎(Elasticsearch)、文件管理服务(Alist)、反向代理(Caddy)、Docker 管理面板(DPanel，MacOS系统最优解)等常用服务。
+基于 Docker Compose 的多服务开发环境，集成 Webman开发环境、Web 服务器(FrankenPHP)、数据库(MySQL、PostgreSQL)、缓存(Redis)、搜索引擎(Elasticsearch)、文件管理服务(Alist)、反向代理(Caddy)、Docker 管理面板(DPanel，MacOS系统最优解)等常用服务。
 
 开箱即用，无需额外配置即可快速启动和运行。
 - Webman 项目直接使用使用自定义镜像（`./webman/Dockerfile`）
 - 支持传统PHP-FPM项目，如Laravel、Thinkphp、WordPress等，使用FrankenPHP服务进行优化，相同配置能提升约3～5倍性能
 - Hyperf (后续计划支持)
 - Mysql
+- PostgreSQL
 - Redis
 - Elasticsearch
 - DPanel
@@ -19,6 +20,7 @@
 | **Webman** | 8787 | PHP 高性能 Web 框架 |
 | **FrankenPHP** | 80, 443 | PHP Web 服务器 |
 | **MySQL** | 3306 | 数据库服务 |
+| **PostgreSQL** | 5432 | 数据库服务 |
 | **Redis** | 6379 | 缓存服务 |
 | **DPanel** | 100, 8807 | Docker 管理面板 |
 | **Elasticsearch** | 9200, 9300 | 搜索引擎 |
@@ -36,6 +38,7 @@
 
 ```bash
 mkdir -p mysql/{data,logs,conf.d}
+mkdir -p postgresql/{data,logs}
 mkdir -p redis/{data,logs}
 mkdir -p elasticsearch/data
 mkdir -p alist caddy/{certs,logs}
@@ -68,7 +71,7 @@ docker-compose up -d
 ### 4. 按需配置服务
 
 ```bash
-docker-compose up -d webman frankenphp mysql redis dpanel elasticsearch alist 
+docker-compose up -d webman frankenphp mysql postgresql redis dpanel elasticsearch alist 
 ```
 
 ## 🔧 服务配置
@@ -157,20 +160,27 @@ web1.test {
 - **Root 密码**: 123456
 - **连接**: `mysql -h localhost -P 3306 -u root -p`
 
-### 4. Redis 缓存
+### 4. PostgreSQL 数据库
+- **端口**: 5432
+- **用户名**: default
+- **密码**: 123456
+- **数据库**: default
+- **连接**: `psql -h localhost -p 5432 -U default -d default`
+
+### 5. Redis 缓存
 - **端口**: 6379
 - **连接**: `redis-cli -h localhost -p 6379`
 
-### 5. DPanel (Docker 管理面板)
+### 6. DPanel (Docker 管理面板)
 - **端口**: 8807
 - **访问**: `http://localhost:8807`
 
-### 6. Elasticsearch
+### 7. Elasticsearch
 - **端口**: 9200 (HTTP), 9300 (节点通信)
 - **密码**: 123456
 - **健康检查**: `curl -u elastic:123456 http://localhost:9200/_cluster/health`
 
-### 7.Alist (文件管理)
+### 8. Alist (文件管理)
 - **端口**: 5244
 - **访问**: `http://localhost:5244`
 
@@ -191,6 +201,10 @@ docker-compose logs -f
 
 # 重启特定服务
 docker-compose restart mysql
+
+# 连接数据库
+docker-compose exec mysql mysql -u root -p
+docker-compose exec postgresql psql -U default -d default
 ```
 
 ## 🔒 安全配置
@@ -201,6 +215,12 @@ docker-compose restart mysql
 ```bash
 docker-compose exec mysql mysql -u root -p
 ALTER USER 'root'@'%' IDENTIFIED BY 'new_password';
+```
+
+**PostgreSQL**:
+```bash
+docker-compose exec postgresql psql -U default -d default
+ALTER USER default PASSWORD 'new_password';
 ```
 
 **Redis**: 编辑 `redis/redis.conf` 添加 `requirepass your_password`
@@ -218,6 +238,7 @@ docker stats
 
 # 备份数据库
 docker-compose exec mysql mysqldump -u root -p123456 --all-databases > backup.sql
+docker-compose exec postgresql pg_dumpall -U default > backup.sql
 ```
 
 ## 🐛 故障排除
@@ -225,7 +246,7 @@ docker-compose exec mysql mysqldump -u root -p123456 --all-databases > backup.sq
 ### 常见问题
 
 1. **端口冲突**: 修改 `docker-compose.yml` 中的端口映射
-2. **权限问题**: `sudo chown -R 1000:1000 mysql/data redis/data`
+2. **权限问题**: `sudo chown -R 1000:1000 mysql/data postgresql/data redis/data`
 3. **内存不足**: 增加 Docker 内存限制
 4. **服务启动失败**: `docker-compose logs service_name`
 
@@ -251,6 +272,7 @@ service/
 │   ├── extension/              # PHP 扩展安装脚本
 │   └── Dockerfile              # Webman 镜像构建文件
 ├── mysql/                      # MySQL 数据
+├── postgresql/                 # PostgreSQL 数据
 ├── redis/                      # Redis 数据
 ├── elasticsearch/              # Elasticsearch 数据
 ├── alist/                      # Alist 数据
@@ -270,6 +292,7 @@ service/
 | **Webman** | 8787 | PHP 高性能 Web 框架 |
 | **FrankenPHP** | 80, 443 | PHP Web 服务器 |
 | **MySQL** | 3306 | 数据库服务 |
+| **PostgreSQL** | 5432 | 数据库服务 |
 | **Redis** | 6379 | 缓存服务 |
 | **DPanel** | 100, 8807 | Docker 管理面板 |
 | **Elasticsearch** | 9200, 9300 | 搜索引擎 |
@@ -283,7 +306,7 @@ service/
 
 ## 💡 安全提醒
 
-- 请修改默认密码（MySQL: 123456, Elasticsearch: 123456）
+- 请修改默认密码（MySQL: 123456, PostgreSQL: 123456, Elasticsearch: 123456）
 - 生产环境建议配置 SSL 证书
 - 考虑限制端口访问范围
 

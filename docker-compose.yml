@@ -59,6 +59,28 @@ services:
       retries: 5
     networks:
       - maxhuang_network
+  # PostgreSQL 数据库服务
+  postgresql:
+    image: postgres:16.3  # 官方镜像（推荐使用固定版本）
+    container_name: postgresql  # 自定义容器名称
+    environment:
+      POSTGRES_PASSWORD: 123456  # 设置 postgres 用户密码
+      POSTGRES_DB: default  # 容器启动时创建的默认数据库
+      POSTGRES_USER: default  # 创建普通用户
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"  # 初始化参数
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data  # 映射数据目录，宿主机:容器
+      - ./postgresql/logs:/var/log/postgresql  # 映射日志目录，宿主机:容器
+    ports:
+      - "5432:5432"  # 暴露默认 PostgreSQL 端口（主机端口:容器端口）
+    restart: always # 容器随docker启动自启
+    healthcheck:  # 健康检查配置
+      test: ["CMD-SHELL", "pg_isready -U default -d default"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - maxhuang_network
   # Redis 缓存服务
   redis:
     image: redis:latest
