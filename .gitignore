@@ -32,6 +32,7 @@ frankenphp/config/*
 !frankenphp/config/.gitkeep
 frankenphp/data/*
 !frankenphp/data/.gitkeep
+frankenphp/www/*
 mariadb/*
 !mariadb/.gitkeep
 mongodb/data/*
