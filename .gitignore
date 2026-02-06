@@ -28,11 +28,11 @@ dpanel/*
 !dpanel/.gitkeep
 elasticsearch/*
 !elasticsearch/.gitkeep
+frankenphp/wwwroot/*
 frankenphp/config/*
 !frankenphp/config/.gitkeep
 frankenphp/data/*
 !frankenphp/data/.gitkeep
-frankenphp/wwwroot/*
 mariadb/*
 !mariadb/.gitkeep
 mongodb/data/*
