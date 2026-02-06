@@ -1,4 +1,6 @@
 # 基于 FrankenPHP 的自定义镜像
+# 优先从国内镜像拉取以减少超时问题；如果该镜像在镜像站不可用，再考虑切换为官方 PHP 基础镜像。
+# 例如：hub-mirror.c.163.com 是网易的 Docker Hub 镜像代理
 FROM dunglas/frankenphp:latest
 
 # 设置工作目录
@@ -64,6 +66,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-x
     pdo \
     pdo_mysql \
     pdo_sqlite \
+    pdo_pgsql \
+    pgsql \
     phar \
     posix \
     readline \

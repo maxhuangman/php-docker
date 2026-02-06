@@ -1,0 +1,96 @@
+{
+  debug
+  frankenphp
+  order php_server before file_server
+  # Disable automatic HTTPS, only use HTTP
+  auto_https off
+}
+
+# Listen on port 80
+:80 {
+  # Logging configuration
+  log {
+    output file /var/log/caddy/access.log
+    format json
+  }
+
+  # baoyi.caddy -> 使用php-docker-php74-1容器
+  @baoyi host baoyi.caddy
+  handle @baoyi {
+    root * /app/baoyi
+    
+    # Enable compression
+    encode zstd br gzip
+    
+    # Serve static files
+    file_server
+    
+    # Handle PHP files
+    try_files {path} {path}/ /index.php?{query}
+    
+    # PHP FastCGI configuration - 连接到php-docker-php74-1容器
+    php_fastcgi php-docker-php74-1:9000 {
+      root /app/baoyi
+      env PHP_VALUE "memory_limit=512M"
+      env PHP_VALUE "max_execution_time=300"
+      env PHP_VALUE "post_max_size=100M"
+      env PHP_VALUE "upload_max_filesize=100M"
+      resolve_root_symlink
+    }
+    
+    # Security headers
+    header {
+      # Prevent XSS attacks
+      X-Content-Type-Options nosniff
+      # Prevent clickjacking
+      X-Frame-Options DENY
+      # Enable XSS protection
+      X-XSS-Protection "1; mode=block"
+    }
+  }
+
+  # test.caddy -> 使用php83容器
+  @test host test.caddy
+  handle @test {
+    root * /app/test/public
+    
+    # Enable compression
+    encode zstd br gzip
+    
+    # Serve static files
+    file_server
+    
+    # Handle PHP files
+    try_files {path} {path}/ /index.php?{query}
+    
+    # PHP FastCGI configuration - 连接到php83容器
+    php_fastcgi php83:9000 {
+      root /app/test/public
+      env PHP_VALUE "memory_limit=512M"
+      env PHP_VALUE "max_execution_time=300"
+      env PHP_VALUE "post_max_size=100M"
+      env PHP_VALUE "upload_max_filesize=100M"
+      resolve_root_symlink
+    }
+    
+    # Security headers
+    header {
+      # Prevent XSS attacks
+      X-Content-Type-Options nosniff
+      # Prevent clickjacking
+      X-Frame-Options DENY
+      # Enable XSS protection
+      X-XSS-Protection "1; mode=block"
+    }
+  }
+
+  # Handle favicon requests to prevent 404 errors
+  @favicon path /favicon.ico
+  handle @favicon {
+    respond "" 204
+  }
+}
+
+# Additional global settings
+# Improve performance by adjusting buffer sizes
+http_port 80

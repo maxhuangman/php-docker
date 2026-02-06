@@ -1,0 +1,15 @@
+[ℹ️info 2025-10-09 17:36:07]:	✌️ DB loaded
+[ℹ️info 2025-10-09 17:36:07]:	✌️ grpc worker started (PID: 126)
+[ℹ️info 2025-10-09 17:36:07]:	✌️ http worker started (PID: 125)
+[ℹ️info 2025-10-09 17:36:07]:	✌️ Dependency loaded
+[ℹ️info 2025-10-09 17:36:07]:	✌️ Link deps loaded
+[ℹ️info 2025-10-09 17:36:07]:	✌️ Init file loaded
+[ℹ️info 2025-10-09 17:36:08]:	✌️ Init file down
+[ℹ️info 2025-10-09 17:36:08]:	✌️ Init data loaded
+[ℹ️info 2025-10-09 17:36:08]:	✌️ Init task loaded
+[ℹ️info 2025-10-09 17:36:08]:	✌️ Express loaded
+[ℹ️info 2025-10-09 17:36:08]:	[panel][取消interval任务], 任务ID: NaN, 任务名: 生成token
+[ℹ️info 2025-10-09 17:36:08]:	[panel][创建interval任务], 任务ID: NaN, 任务名: 生成token, 执行命令: node /ql/static/build/token.js
+[ℹ️info 2025-10-09 17:36:08]:	[panel][开始执行任务] 参数: {"name":"生成token","command":"node /ql/static/build/token.js","id":"NaN"}
+[ℹ️info 2025-10-09 17:36:08]:	✌️ Sock loaded
+[ℹ️info 2025-10-09 17:36:08]:	[panel][执行任务结束] 参数: {"name":"生成token","command":"node /ql/static/build/token.js","id":"NaN"}, 退出码: 0

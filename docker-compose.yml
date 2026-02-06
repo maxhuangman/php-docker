@@ -1,7 +1,7 @@
 services:
   # Webman 服务
   webman:
-    build: ./webman  # 使用 webman 目录下的 Dockerfile 构建
+    build: ./webman # 使用 webman 目录下的 Dockerfile 构建
     container_name: webman
     ports:
       - "8787:8787"
@@ -11,24 +11,34 @@ services:
       - maxhuang_network
   # FrankenPHP 服务
   frankenphp:
-    build: ./frankenphp  # 使用 frankenphp 目录下的 Dockerfile 构建
+    build:
+      context: ./frankenphp
+      dockerfile: custom.Dockerfile
     container_name: frankenphp
-    restart: always # 容器随docker启动自启
+    restart: "no" # 容器随docker启动自启
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp" # HTTP/3
+      - "80:80" # 映射到主机 8080 端口
+      - "443:443" # 映射到主机 8443 端口
     volumes:
       - ./frankenphp/wwwroot:/app # 网站根目录
       - ./frankenphp/data:/data
       - ./frankenphp/config:/config
       - ./caddy/certs:/etc/caddy/certs
       - ./caddy/logs:/var/log/caddy
-      - ./caddy/Caddyfile:/etc/frankenphp/Caddyfile:ro  # 正确路径
+      - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro # 正确路径
     environment:
       # - ENABLE_HTTPS=false # 禁用自动 HTTPS
       - PHP_MEMORY_LIMIT=512M # PHP 内存限制
       - PHP_MAX_EXECUTION_TIME=300 # 最大执行时间
+      # 以下用于连接本机(Orbstack宿主)的 MySQL/Redis 服务：
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=default
+      - DB_USERNAME=default
+      - DB_PASSWORD=123456
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - WWWUSER=1000
     healthcheck:
       interval: 30s
       timeout: 10s
@@ -36,23 +46,97 @@ services:
       start_period: 40s
     networks:
       - maxhuang_network
+  # PHP 7.4 FPM 服务
+  php74:
+    image: php:7.4-fpm
+    container_name: php74
+    volumes:
+      - ./frankenphp/wwwroot:/app
+    networks:
+      - maxhuang_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PHP 8.0 FPM 服务
+  php80:
+    image: php:8.0-fpm
+    container_name: php80
+    volumes:
+      - ./frankenphp/wwwroot:/app
+    networks:
+      - maxhuang_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PHP 8.1 FPM 服务
+  php81:
+    image: php:8.1-fpm
+    container_name: php81
+    volumes:
+      - ./frankenphp/wwwroot:/app
+    networks:
+      - maxhuang_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PHP 8.2 FPM 服务
+  php82:
+    image: php:8.2-fpm
+    container_name: php82
+    volumes:
+      - ./frankenphp/wwwroot:/app
+    networks:
+      - maxhuang_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PHP 8.3 FPM 服务（主要版本）
+  php83:
+    image: php:8.3-fpm
+    container_name: php83
+    volumes:
+      - ./frankenphp/wwwroot:/app
+    networks:
+      - maxhuang_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   # MySQL 数据库服务
   mysql:
-    image: mysql:8.4  # 官方镜像（推荐使用固定版本）
-    container_name: mysql  # 自定义容器名称
+    image: mysql:8.4 # 官方镜像（推荐使用固定版本）
+    container_name: mysql # 自定义容器名称
     environment:
       MYSQL_ROOT_PASSWORD: 123456 # 设置 root 用户密码
-      MYSQL_DATABASE: default  # 容器启动时创建的默认数据库
-      MYSQL_USER: default    # 创建普通用户
-      MYSQL_PASSWORD: 123456  # 普通用户密码
+      MYSQL_DATABASE: default # 容器启动时创建的默认数据库
+      MYSQL_USER: default # 创建普通用户
+      MYSQL_PASSWORD: 123456 # 普通用户密码
     volumes:
       - ./mysql/logs:/var/log/mysql # 映射日志目录，宿主机:容器
       - ./mysql/data:/var/lib/mysql # 映射数据目录，宿主机:容器
       - ./mysql/conf.d:/etc/mysql/conf.d # 映射配置目录，宿主机:容器
     ports:
-      - "3306:3306"  # 暴露默认 MySQL 端口（主机端口:容器端口）
+      - "3306:3306" # 暴露默认 MySQL 端口（主机端口:容器端口）
     restart: always # 容器随docker启动自启
-    healthcheck:  # 健康检查配置
+    healthcheck: # 健康检查配置
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 10s
@@ -61,24 +145,47 @@ services:
       - maxhuang_network
   # PostgreSQL 数据库服务
   postgresql:
-    image: postgres:16.3  # 官方镜像（推荐使用固定版本）
-    container_name: postgresql  # 自定义容器名称
+    image: postgres:16.3 # 官方镜像（推荐使用固定版本）
+    container_name: postgresql # 自定义容器名称
     environment:
-      POSTGRES_PASSWORD: 123456  # 设置 postgres 用户密码
-      POSTGRES_DB: default  # 容器启动时创建的默认数据库
-      POSTGRES_USER: default  # 创建普通用户
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"  # 初始化参数
+      POSTGRES_PASSWORD: 123456 # 设置 postgres 用户密码
+      POSTGRES_DB: default # 容器启动时创建的默认数据库
+      POSTGRES_USER: default # 创建普通用户
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C" # 初始化参数
     volumes:
-      - ./postgresql/data:/var/lib/postgresql/data  # 映射数据目录，宿主机:容器
-      - ./postgresql/logs:/var/log/postgresql  # 映射日志目录，宿主机:容器
+      - ./postgresql/data:/var/lib/postgresql/data # 映射数据目录，宿主机:容器
+      - ./postgresql/logs:/var/log/postgresql # 映射日志目录，宿主机:容器
     ports:
-      - "5432:5432"  # 暴露默认 PostgreSQL 端口（主机端口:容器端口）
+      - "5432:5432" # 暴露默认 PostgreSQL 端口（主机端口:容器端口）
     restart: always # 容器随docker启动自启
-    healthcheck:  # 健康检查配置
+    healthcheck: # 健康检查配置
       test: ["CMD-SHELL", "pg_isready -U default -d default"]
       interval: 5s
       timeout: 10s
       retries: 5
+    networks:
+      - maxhuang_network
+  # MongoDB 数据库服务
+  mongodb:
+    image: mongo:7.0 # 官方镜像（推荐使用固定版本）
+    container_name: mongodb # 自定义容器名称
+    # environment:
+    # MONGO_INITDB_ROOT_USERNAME: admin  # 设置 root 用户名
+    # MONGO_INITDB_ROOT_PASSWORD: 123456  # 设置 root 密码
+    # MONGO_INITDB_DATABASE: default  # 容器启动时创建的默认数据库
+    volumes:
+      - ./mongodb/data:/data/db # 映射数据目录，宿主机:容器
+      - ./mongodb/logs:/var/log/mongodb # 映射日志目录，宿主机:容器
+      - ./mongodb/config:/etc/mongo # 映射配置目录，宿主机:容器
+    ports:
+      - "27017:27017" # 暴露默认 MongoDB 端口（主机端口:容器端口）
+    restart: always # 容器随docker启动自启
+    healthcheck: # 健康检查配置
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       - maxhuang_network
   # Redis 缓存服务
@@ -87,11 +194,27 @@ services:
     container_name: redis
     restart: always
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - ./redis/data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - ./redis/logs:/logs
+    networks:
+      - maxhuang_network
+  # RabbitMQ 消息队列服务
+  rabbitmq:
+    build: ./rabbitmq # 使用自定义 Dockerfile 构建
+    container_name: rabbitmq
+    restart: no
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - ./rabbitmq/mnesia:/var/lib/rabbitmq/mnesia
+      - ./rabbitmq/logs:/var/log/rabbitmq
     networks:
       - maxhuang_network
   # DPanel 服务
@@ -118,6 +241,7 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    restart: no # 容器随docker启动自启
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       discovery.type: single-node
@@ -128,14 +252,23 @@ services:
       TZ: Asia/Shanghai
     networks:
       - maxhuang_network
+  # 轻量级白板方案
+  wbo:
+    image: lovasoa/wbo:latest
+    container_name: wbo
+    ports:
+      - "5001:80"
+    volumes:
+      - ./wbo:/opt/app/server-data
+    restart: always
   # Alist 文件管理服务
   alist:
-    image: 'xhofe/alist:beta'
+    image: "xhofe/alist:beta"
     container_name: alist
     volumes:
-      - './alist:/opt/alist/data'
+      - "./alist:/opt/alist/data"
     ports:
-      - '5244:5244'
+      - "5244:5244"
     environment:
       - PUID=0
       - PGID=0
@@ -147,5 +280,5 @@ services:
 # 自定义网络配置（容器间可通过服务名通信）
 networks:
   maxhuang_network:
-    name: maxhuang_network  # 指定确切的网络名称，避免项目前缀
-    driver: bridge  # 桥接网络
+    name: maxhuang_network # 指定确切的网络名称，避免项目前缀
+    driver: bridge # 桥接网络
