@@ -22,7 +22,6 @@ Thumbs.db
 logs/
 
 # Data directories
-alist/
 mysql/
 redis/
 mariadb/

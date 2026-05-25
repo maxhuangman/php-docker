@@ -261,22 +261,17 @@ services:
     volumes:
       - ./wbo:/opt/app/server-data
     restart: always
-  # Alist 文件管理服务
-  alist:
-    image: "xhofe/alist:beta"
-    container_name: alist
-    volumes:
-      - "./alist:/opt/alist/data"
+  # Docsify 文档服务
+  docsify:
+    image: lissy93/docsify
+    container_name: docsify
+    restart: always # 容器随docker启动自启
     ports:
-      - "5244:5244"
-    environment:
-      - PUID=0
-      - PGID=0
-      - UMASK=022
-    restart: unless-stopped
+      - "3000:80"
+    volumes:
+      - ./docs:/docs
     networks:
       - maxhuang_network
-
 # 自定义网络配置（容器间可通过服务名通信）
 networks:
   maxhuang_network:

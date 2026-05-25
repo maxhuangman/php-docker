@@ -1,6 +1,6 @@
 # Docker FrankenPHP 服务环境
 
-基于 Docker Compose 的多服务开发环境，集成 Webman开发环境、Web 服务器(FrankenPHP)、数据库(MySQL、PostgreSQL、MongoDB)、缓存(Redis)、搜索引擎(Elasticsearch)、文件管理服务(Alist)、反向代理(Caddy)、Docker 管理面板(DPanel，MacOS系统最优解)等常用服务。
+基于 Docker Compose 的多服务开发环境，集成 Webman开发环境、Web 服务器(FrankenPHP)、数据库(MySQL、PostgreSQL、MongoDB)、缓存(Redis)、搜索引擎(Elasticsearch)、文档服务(Docsify)、反向代理(Caddy)、Docker 管理面板(DPanel，MacOS系统最优解)等常用服务。
 
 开箱即用，无需额外配置即可快速启动和运行。
 - Webman 项目直接使用使用自定义镜像（`./webman/Dockerfile`）
@@ -12,7 +12,7 @@
 - Redis
 - Elasticsearch
 - DPanel
-- Alist
+- Docsify
 
 ## 🚀 服务概览
 
@@ -26,7 +26,7 @@
 | **Redis** | 6379 | 缓存服务 |
 | **DPanel** | 100, 8807 | Docker 管理面板 |
 | **Elasticsearch** | 9200, 9300 | 搜索引擎 |
-| **Alist** | 5244 | 文件管理服务 |
+| **Docsify** | 3000 | 文档服务 |
 
 ## 📋 系统要求
 
@@ -44,9 +44,9 @@ mkdir -p postgresql/{data,logs}
 mkdir -p mongodb/{data,logs,config}
 mkdir -p redis/{data,logs}
 mkdir -p elasticsearch/data
-mkdir -p alist caddy/{certs,logs}
+mkdir -p caddy/{certs,logs}
 mkdir -p frankenphp/{data,config} dpanel wwwroot
-mkdir -p webman/www
+mkdir -p docs webman/www
 ```
 
 ### 2. 配置 Redis
@@ -74,13 +74,14 @@ docker-compose up -d
 ### 4. 按需配置服务
 
 ```bash
-docker-compose up -d webman frankenphp mysql postgresql mongodb redis dpanel elasticsearch alist 
+docker-compose up -d webman frankenphp mysql postgresql mongodb redis dpanel elasticsearch docsify
 docker-compose up -d mongodb
 docker-compose up -d elasticsearch
 docker-compose up -d postgresql
 docker-compose up -d rabbitmq
 docker-compose up -d dpanel
 docker-compose up -d frankenphp
+docker-compose up -d docsify
 ```
 
 ## 🔧 服务配置
@@ -196,9 +197,10 @@ web1.test {
 - **密码**: 123456
 - **健康检查**: `curl -u elastic:123456 http://localhost:9200/_cluster/health`
 
-### 9. Alist (文件管理)
-- **端口**: 5244
-- **访问**: `http://localhost:5244`
+### 9. Docsify (文档服务)
+- **端口**: 3000
+- **文档目录**: `./docs`
+- **访问**: `http://localhost:3000`
 
 ## 🚀 常用命令
 
@@ -301,7 +303,7 @@ service/
 ├── mongodb/                    # MongoDB 数据
 ├── redis/                      # Redis 数据
 ├── elasticsearch/              # Elasticsearch 数据
-├── alist/                      # Alist 数据
+├── docs/                        # Docsify 文档
 ├── caddy/                      # Caddy 配置
 ├── frankenphp/                 # FrankenPHP 配置
 └── dpanel/                     # DPanel 数据
@@ -323,7 +325,7 @@ service/
 | **Redis** | 6379 | 缓存服务 |
 | **DPanel** | 100, 8807 | Docker 管理面板 |
 | **Elasticsearch** | 9200, 9300 | 搜索引擎 |
-| **Alist** | 5244 | 文件管理服务 |
+| **Docsify** | 3000 | 文档服务 |
 
 ## 💡 使用建议
 

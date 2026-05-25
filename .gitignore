@@ -19,8 +19,7 @@ bin-release/
 /.history/
 /.vscode/
 
-alist/*
-!alist/.gitkeep
+
 caddy/*
 !caddy/.gitkeep
 !caddy/Caddyfile
